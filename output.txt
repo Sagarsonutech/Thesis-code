@@ -1,0 +1,1035 @@
+The original dataset from the reference consists of 5 different folders, each with 100 files, with each file representing a single subject/person. Each file is a recording of brain activity for 23.6 seconds. The corresponding time-series is sampled into 4097 data points. Each data point is the value of the EEG recording at a different point in time. So we have total 500 individuals with each has 4097 data points for 23.5 seconds.
+
+We divided and shuffled every 4097 data points into 23 chunks, each chunk contains 178 data points for 1 second, and each data point is the value of the EEG recording at a different point in time. So now we have 23 x 500 = 11500 pieces of information(row), each information contains 178 data points for 1 second(column), the last column represents the label y {1,2,3,4,5}.
+
+The response variable is y in column 179, the Explanatory variables X1, X2, …, X178
+
+y contains the category of the 178-dimensional input vector. Specifically y in {1, 2, 3, 4, 5}:
+
+5 - eyes open, means when they were recording the EEG signal of the brain the patient had their eyes open
+
+4 - eyes closed, means when they were recording the EEG signal the patient had their eyes closed
+
+3 - Yes they identify where the region of the tumor was in the brain and recording the EEG activity from the healthy brain area
+
+2 - They recorder the EEG from the area where the tumor was located
+
+1 - Recording of seizure activity
+
+All subjects falling in classes 2, 3, 4, and 5 are subjects who did not have epileptic seizure. Only subjects in class 1 have epileptic seizure. Our motivation for creating this version of the data was to simplify access to the data via the creation of a .csv version of it. Although there are 5 classes most authors have done binary classification, namely class 1 (Epileptic seizure) against the rest.
+
+This Dataset collect from UCI Machine Learning Repository
+
+
+
+
+
+
+
+df.astype
+<bound method NDFrame.astype of                id   X1   X2   X3   X4   X5   X6   X7   X8   X9  X10  X11  X12  ...  X167  X168  X169  X170  X171  X172  X173  X174 
+ X175  X176  X177  X178  y
+0      X21.V1.791  135  190  229  223  192  125   55   -9  -33  -38  -10   35  ...   -11    10     8   -17   -15   -31   -77  -103  -127  -116   -83   -51  4      
+1      X15.V1.924  386  382  356  331  320  315  307  272  244  232  237  258  ...   131   163   168   164   150   146   152   157   156   154   143   129  1      
+2         X8.V1.1  -32  -39  -47  -37  -32  -36  -57  -73  -85  -94  -99  -94  ...   -42    -6    29    57    64    48    19   -12   -30   -35   -35   -36  5      
+3       X16.V1.60 -105 -101  -96  -92  -89  -95 -102 -100  -87  -79  -72  -68  ...   -74   -74   -80   -82   -81   -80   -77   -85   -77   -72   -69   -65  5      
+4       X20.V1.54   -9  -65  -98 -102  -78  -48  -16    0  -21  -59  -90 -103  ...    15    11    10     4     2   -12   -32   -41   -65   -83   -89   -73  5      
+...           ...  ...  ...  ...  ...  ...  ...  ...  ...  ...  ...  ...  ...  ...   ...   ...   ...   ...   ...   ...   ...   ...   ...   ...   ...   ... ..      
+11495  X22.V1.114  -22  -22  -23  -26  -36  -42  -45  -42  -45  -49  -57  -64  ...    24    24    20    15    16    12     5    -1   -18   -37   -47   -48  2      
+11496  X19.V1.354  -47  -11   28   77  141  211  246  240  193  136   78    8  ...  -162  -126   -94   -65   -33    -7    14    27    48    77   117   170  1      
+11497    X8.V1.28   14    6  -13  -16   10   26   27   -9    4   14   -1  -10  ...   -57   -78   -42   -65   -48   -61   -62   -67   -30    -2    -1    -8  5      
+11498  X10.V1.932  -40  -25   -9  -12   -2   12    7   19   22   29   22    6  ...    97   105   114   121   135   148   143   116    86    68    59    55  3      
+11499  X16.V1.210   29   41   57   72   74   62   54   43   31   23   13   11  ...   -75   -98   -94   -59   -25    -4     2     5     4    -2     2    20  4      
+
+[11500 rows x 180 columns]>
+>>> cols = df.columns
+>>> df.describe()
+                 X1            X2            X3            X4            X5  ...          X175          X176          X177          X178             y
+count  11500.000000  11500.000000  11500.000000  11500.000000  11500.000000  ...  11500.000000  11500.000000  11500.000000  11500.000000  11500.000000
+mean     -11.581391    -10.911565    -10.187130     -9.143043     -8.009739  ...    -13.045043    -12.705130    -12.426000    -12.195652      3.000000
+std      165.626284    166.059609    163.524317    161.269041    160.998007  ...    164.241019    162.895832    162.886311    164.852015      1.414275
+min    -1839.000000  -1838.000000  -1835.000000  -1845.000000  -1791.000000  ...  -1863.000000  -1781.000000  -1727.000000  -1829.000000      1.000000
+25%      -54.000000    -55.000000    -54.000000    -54.000000    -54.000000  ...    -56.000000    -55.000000    -55.000000    -55.000000      2.000000
+50%       -8.000000     -8.000000     -7.000000     -8.000000     -8.000000  ...     -9.000000     -9.000000     -9.000000     -9.000000      3.000000
+75%       34.000000     35.000000     36.000000     36.000000     35.000000  ...     34.000000     34.000000     34.000000     34.000000      4.000000
+max     1726.000000   1713.000000   1697.000000   1612.000000   1518.000000  ...   1958.000000   2047.000000   2047.000000   1915.000000      5.000000
+
+[8 rows x 179 columns]
+>>> feature_columns = [col for col in df.columns if col.startswith('X')]
+>>> df[feature_columns] = df[feature_columns].apply(pd.to_numeric, errors='coerce')
+>>> df['y'] = pd.to_numeric(df['y'], errors='coerce')
+>>> # Verify the conversion
+>>>
+>>> print(df.dtypes)
+id      object
+X1       int64
+X2       int64
+X3       int64
+X4       int64
+         ...
+X175     int64
+X176     int64
+X177     int64
+X178     int64
+y        int64
+Length: 180, dtype: object
+>>> df = df.drop(columns=['id'])
+>>> tgt = df['y']
+>>> tgt[tgt > 1] = 0
+>>> non_seizure, seizure = tgt.value_counts()
+>>> print('The number of trials for the non-seizure class is:', non_seizure)
+The number of trials for the non-seizure class is: 9200
+>>> print('The number of trials for the seizure class is:', seizure)
+The number of trials for the seizure class is: 2300
+>>> X = df.iloc[:,1:-1].values
+>>> X.shape
+(11500, 177)
+>>> y = df.iloc[:,-1:].values
+>>> y[y>1] = 0
+>>> y.shape
+(11500, 1)
+>>> df.isnull().sum()
+X1      0
+X2      0
+X3      0
+X4      0
+X5      0
+       ..
+X175    0
+X176    0
+X177    0
+X178    0
+y       0
+Length: 179, dtype: int64
+>>> from sklearn.preprocessing import normalize, StandardScaler
+>>> X = df.drop('y', axis=1)
+>>> y = df['y']
+>>> df = pd.DataFrame(normalize(X))
+>>> # Initialize the counters for detected and managed outliers
+>>>
+>>> detected_outliers = 0
+>>> managed_outliers = 0
+>>> # Loop through each of the 178 explanatory variables and calculate the IQR and bounds
+>>>
+>>> for col in df.columns[:-1]:
+...     Q1 = df[col].quantile(0.25)
+...     Q3 = df[col].quantile(0.75)
+...     IQR = Q3 - Q1
+...     lower_bound = Q1 - 1.5 * IQR
+...     upper_bound = Q3 + 1.5 * IQR
+... # Identify any data points that fall outside the bounds and either remove or adjust them
+...
+>>> outliers = (df[col] < lower_bound) | (df[col] > upper_bound)
+>>> if outliers.any():
+...         detected_outliers += outliers.sum()
+...         df.loc[outliers, col] = np.nanmedian(df[col])
+...         managed_outliers += outliers.sum()
+...
+>>> print(f"Detected {detected_outliers} outliers and managed {managed_outliers} outliers.")
+Detected 95 outliers and managed 95 outliers.
+>>> df['y'] = y
+>>> print('Normalized Totall Mean VALUE for Epiletic: {}'.format((df[df['y'] == 1].describe().mean()).mean()))
+Normalized Totall Mean VALUE for Epiletic: 287.51333046312305
+>>> print('Normalized Totall Std VALUE for Epiletic: {}'.format((df[df['y'] == 1].describe().std()).std()))
+Normalized Totall Std VALUE for Epiletic: 0.022547928735791065
+>>> print('Normalized Totall Mean VALUE for NOT Epiletic: {}'.format((df[df['y'] == 0].describe().mean()).mean()))
+Normalized Totall Mean VALUE for NOT Epiletic: 1150.0065190002551
+>>> print('Normalized Totall Std VALUE for NOT Epiletic: {}'.format((df[df['y'] == 0].describe().std()).std()))
+Normalized Totall Std VALUE for NOT Epiletic: 0.0020103072535837493
+>>> df.head()
+          0         1         2         3         4         5         6         7  ...       171       172       173       174       175       176       177  y
+0  0.104109  0.146523  0.176599  0.171972  0.148066  0.096397  0.042415 -0.006941  ... -0.023906 -0.059381 -0.079431 -0.097939 -0.089456 -0.064008 -0.039330  0    
+1  0.061209  0.060575  0.056452  0.052488  0.050743  0.049951  0.048682  0.043132  ...  0.023152  0.024103  0.024896  0.024737  0.024420  0.022676  0.020456  1    
+2 -0.038444 -0.046854 -0.056465 -0.044451 -0.038444 -0.043250 -0.068479 -0.087701  ...  0.057666  0.022826 -0.014417 -0.036042 -0.042048 -0.042048 -0.043250  0    
+3 -0.111276 -0.107037 -0.101738 -0.097499 -0.094319 -0.100678 -0.108096 -0.105977  ... -0.084781 -0.081602 -0.090080 -0.081602 -0.076303 -0.073124 -0.068885  0    
+4 -0.017182 -0.124093 -0.187094 -0.194730 -0.148911 -0.091638 -0.030546  0.000000  ... -0.022909 -0.061092 -0.078274 -0.124093 -0.158457 -0.169912 -0.139366  0    
+
+[5 rows x 179 columns]
+>>> import imblearn
+>>> oversample = imblearn.over_sampling.RandomOverSampler(sampling_strategy='minority')
+>>> # fit and apply the transform
+>>>
+>>> X, y = oversample.fit_resample(df.drop('y', axis=1), df['y'])
+>>> X.shape, y.shape
+((18400, 178), (18400,))
+>>> df.corr()
+            0         1         2         3         4         5         6  ...       172       173       174       175       176       177         y
+0    1.000000  0.955034  0.846711  0.706301  0.569403  0.458058  0.377546  ...  0.087484  0.081869  0.075734  0.067617  0.063632  0.063154  0.018215
+1    0.955034  1.000000  0.953619  0.841539  0.699143  0.564187  0.455331  ...  0.098311  0.089364  0.082672  0.073631  0.068362  0.062695  0.018882
+2    0.846711  0.953619  1.000000  0.952503  0.839730  0.699182  0.566324  ...  0.106039  0.097366  0.087982  0.079142  0.075132  0.065042  0.021726
+3    0.706301  0.841539  0.952503  1.000000  0.952337  0.841312  0.703810  ...  0.110835  0.106147  0.097316  0.087071  0.083777  0.071147  0.026981
+4    0.569403  0.699143  0.839730  0.952337  1.000000  0.953696  0.845512  ...  0.108695  0.106264  0.101552  0.093637  0.089600  0.077066  0.034581
+..        ...       ...       ...       ...       ...       ...       ...  ...       ...       ...       ...       ...       ...       ...       ...
+174  0.075734  0.082672  0.087982  0.097316  0.101552  0.098919  0.090625  ...  0.839760  0.952002  1.000000  0.951448  0.806974  0.699374  0.020153
+175  0.067617  0.073631  0.079142  0.087071  0.093637  0.096738  0.090525  ...  0.695914  0.837561  0.951448  1.000000  0.912066  0.841699  0.018939
+176  0.063632  0.068362  0.075132  0.083777  0.089600  0.095744  0.094104  ...  0.544970  0.672718  0.806974  0.912066  1.000000  0.911878  0.014895
+177  0.063154  0.062695  0.065042  0.071147  0.077066  0.083087  0.085836  ...  0.449099  0.561038  0.699374  0.841699  0.911878  1.000000  0.016689
+y    0.018215  0.018882  0.021726  0.026981  0.034581  0.044020  0.052083  ...  0.024354  0.022157  0.020153  0.018939  0.014895  0.016689  1.000000
+
+[179 rows x 179 columns]
+>>> fig, ax = plt.subplots(figsize=(25, 25))
+>>> # Create heatmap
+>>>
+>>> sns.heatmap(df.corr(), annot=True, ax=ax)
+<Axes: >
+>>> plt.show()
+Exception in Tkinter callback
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 1967, in __call__
+    return self.func(*args)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\backends\_backend_tk.py", line 549, in destroy
+    Gcf.destroy(self)
+  File "C:\Users\Lenovo\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\_pylab_helpers.py", line 66, in destroy
+    manager.destroy()
+  File "C:\Users\Lenovo\AppData\Local\Programs\Python\Python312\Lib\site-packages\matplotlib\backends\_backend_tk.py", line 566, in destroy
+    self._window_dpi.trace_remove('write', self._window_dpi_cbname)
+  File "C:\Users\Lenovo\AppData\Local\Programs\Python\Python312\Lib\tkinter\__init__.py", line 477, in trace_remove
+    self._tk.deletecommand(cbname)
+_tkinter.TclError: can't delete Tcl command
+>>> print('Number of records of Non Epileptic {0} VS Epilepttic {1}'.format(len(y == True), len(y == False)))
+Number of records of Non Epileptic 18400 VS Epilepttic 18400
+>>> df.head()
+          0         1         2         3         4         5         6         7  ...       171       172       173       174       175       176       177  y
+0  0.104109  0.146523  0.176599  0.171972  0.148066  0.096397  0.042415 -0.006941  ... -0.023906 -0.059381 -0.079431 -0.097939 -0.089456 -0.064008 -0.039330  0    
+1  0.061209  0.060575  0.056452  0.052488  0.050743  0.049951  0.048682  0.043132  ...  0.023152  0.024103  0.024896  0.024737  0.024420  0.022676  0.020456  1    
+2 -0.038444 -0.046854 -0.056465 -0.044451 -0.038444 -0.043250 -0.068479 -0.087701  ...  0.057666  0.022826 -0.014417 -0.036042 -0.042048 -0.042048 -0.043250  0    
+3 -0.111276 -0.107037 -0.101738 -0.097499 -0.094319 -0.100678 -0.108096 -0.105977  ... -0.084781 -0.081602 -0.090080 -0.081602 -0.076303 -0.073124 -0.068885  0    
+4 -0.017182 -0.124093 -0.187094 -0.194730 -0.148911 -0.091638 -0.030546  0.000000  ... -0.022909 -0.061092 -0.078274 -0.124093 -0.158457 -0.169912 -0.139366  0    
+
+[5 rows x 179 columns]
+>>> df.isnull().sum()
+0      0
+1      0
+2      0
+3      0
+4      0
+      ..
+174    0
+175    0
+176    0
+177    0
+y      0
+Length: 179, dtype: int64
+>>> ##split 
+>>>
+>>> X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+>>> #Check the shapes after splitting
+>>>
+>>> he = X_train, X_test, y_train, y_test
+>>> [arr.shape for arr in he]
+[(14720, 178), (3680, 178), (14720,), (3680,)]
+>>> X.isnull().sum()
+0      0
+1      0
+2      0
+3      0
+4      0
+      ..
+173    0
+174    0
+175    0
+176    0
+177    0
+Length: 178, dtype: int64
+>>> from sklearn.model_selection import cross_validate, RepeatedStratifiedKFold, GridSearchCV
+>>> from sklearn.linear_model import LogisticRegression
+>>> from sklearn.svm import SVC
+>>> from sklearn.neighbors import KNeighborsClassifier
+>>> from sklearn.tree import DecisionTreeClassifier
+>>> from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+>>> # Split your dataset into training and testing sets
+>>>
+>>> X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+>>> # List of models to evaluate
+>>>
+>>> models = [LogisticRegression(), SVC(), DecisionTreeClassifier(),
+...           RandomForestClassifier(), GradientBoostingClassifier(), KNeighborsClassifier()]
+>>> # Check models' classification reports
+>>>
+>>> def evaluate_models(models):
+...     for model in models:
+...         model_name = type(model).__name__
+...         print(f"Training {model_name}...\n")
+...         # Fit the model on the training data
+...         model.fit(X_train, y_train)
+...         # Make predictions on the test data
+...         y_pred = model.predict(X_test)
+...         # Print classification report
+...         print(f"Classification Report for {model_name}:\n")
+...         print(classification_report(y_test, y_pred))
+...         print("=" * 60)
+...
+>>> evaluate_models(models)
+Training LogisticRegression...
+
+Classification Report for LogisticRegression:
+
+              precision    recall  f1-score   support
+
+           0       0.58      0.55      0.56      1878
+           1       0.55      0.57      0.56      1802
+
+    accuracy                           0.56      3680
+   macro avg       0.56      0.56      0.56      3680
+weighted avg       0.56      0.56      0.56      3680
+
+============================================================
+Training SVC...
+
+Classification Report for SVC:
+
+              precision    recall  f1-score   support
+
+           0       0.93      0.92      0.92      1878
+           1       0.91      0.93      0.92      1802
+
+    accuracy                           0.92      3680
+   macro avg       0.92      0.92      0.92      3680
+weighted avg       0.92      0.92      0.92      3680
+
+============================================================
+Training DecisionTreeClassifier...
+
+Classification Report for DecisionTreeClassifier:
+
+              precision    recall  f1-score   support
+
+           0       0.97      0.84      0.90      1878
+           1       0.85      0.97      0.91      1802
+
+    accuracy                           0.90      3680
+   macro avg       0.91      0.91      0.90      3680
+weighted avg       0.91      0.90      0.90      3680
+
+============================================================
+Training RandomForestClassifier...
+
+Classification Report for RandomForestClassifier:
+
+              precision    recall  f1-score   support
+
+           0       0.98      0.99      0.99      1878
+           1       0.99      0.98      0.99      1802
+
+    accuracy                           0.99      3680
+   macro avg       0.99      0.99      0.99      3680
+weighted avg       0.99      0.99      0.99      3680
+
+============================================================
+Training GradientBoostingClassifier...
+
+Classification Report for GradientBoostingClassifier:
+
+              precision    recall  f1-score   support
+
+           0       0.86      0.81      0.83      1878
+           1       0.81      0.86      0.83      1802
+
+    accuracy                           0.83      3680
+   macro avg       0.83      0.83      0.83      3680
+weighted avg       0.83      0.83      0.83      3680
+
+============================================================
+Training KNeighborsClassifier...
+
+Classification Report for KNeighborsClassifier:
+
+              precision    recall  f1-score   support
+
+           0       0.94      0.87      0.90      1878
+           1       0.87      0.95      0.91      1802
+
+    accuracy                           0.91      3680
+   macro avg       0.91      0.91      0.91      3680
+weighted avg       0.91      0.91      0.91      3680
+
+============================================================
+>>> X = df.iloc[:,1:-1].values
+>>> X.shape
+(11500, 177)
+>>> y = df.iloc[:,-1:].values
+>>> y[y>1] = 0
+>>> y.shape
+(11500, 1)
+>>> X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.25,shuffle=True)
+>>> X_train.shape,y_test.shape
+((8625, 177), (2875, 1))
+>>> def denseBlock(dims,inp) :
+...     x = tf.keras.layers.BatchNormalization() (inp)
+...     x = tf.keras.layers.Dense(dims,activation=tf.keras.layers.LeakyReLU(0.2)) (x)
+...     x = tf.keras.layers.Dropout(0.4) (x)
+...     x = tf.keras.layers.Dense(dims,activation=tf.keras.layers.LeakyReLU(0.2)) (x)
+...     x = tf.keras.layers.Dropout(0.4) (x)
+...     x = tf.keras.layers.Dense(dims,activation=tf.keras.layers.LeakyReLU(0.2)) (x)
+...     x = tf.keras.layers.Dropout(0.4) (x)
+...     x = tf.keras.layers.Dense(64,activation=tf.keras.layers.LeakyReLU(0.2)) (x)
+...     return x
+...
+>>> inp = tf.keras.layers.Input(shape=(177,),name='input')
+>>> x1 = denseBlock(256,inp)
+2024-09-13 23:15:29.304394: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+>>> x2 = denseBlock(512,inp)
+>>> x3 = denseBlock(1024,inp)
+>>> x = tf.keras.layers.Concatenate()([x1,x2,x3])
+>>> x = tf.keras.layers.Dense(128,activation=tf.keras.layers.LeakyReLU(0.2)) (x)
+>>> out = tf.keras.layers.Dense(1,activation='sigmoid',name='output') (x)
+>>> model = tf.keras.models.Model(inp,out)
+>>> model.summary()
+Model: "functional"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)                  ┃ Output Shape              ┃         Param # ┃ Connected to               ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ input (InputLayer)            │ (None, 177)               │               0 │ -                          │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ batch_normalization           │ (None, 177)               │             708 │ input[0][0]                │
+│ (BatchNormalization)          │                           │                 │                            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ batch_normalization_1         │ (None, 177)               │             708 │ input[0][0]                │
+│ (BatchNormalization)          │                           │                 │                            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ batch_normalization_2         │ (None, 177)               │             708 │ input[0][0]                │
+│ (BatchNormalization)          │                           │                 │                            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense (Dense)                 │ (None, 256)               │          45,568 │ batch_normalization[0][0]  │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_4 (Dense)               │ (None, 512)               │          91,136 │ batch_normalization_1[0][… │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_8 (Dense)               │ (None, 1024)              │         182,272 │ batch_normalization_2[0][… │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dropout (Dropout)             │ (None, 256)               │               0 │ dense[0][0]                │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dropout_3 (Dropout)           │ (None, 512)               │               0 │ dense_4[0][0]              │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dropout_6 (Dropout)           │ (None, 1024)              │               0 │ dense_8[0][0]              │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_1 (Dense)               │ (None, 256)               │          65,792 │ dropout[0][0]              │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_5 (Dense)               │ (None, 512)               │         262,656 │ dropout_3[0][0]            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_9 (Dense)               │ (None, 1024)              │       1,049,600 │ dropout_6[0][0]            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dropout_1 (Dropout)           │ (None, 256)               │               0 │ dense_1[0][0]              │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dropout_4 (Dropout)           │ (None, 512)               │               0 │ dense_5[0][0]              │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dropout_7 (Dropout)           │ (None, 1024)              │               0 │ dense_9[0][0]              │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_2 (Dense)               │ (None, 256)               │          65,792 │ dropout_1[0][0]            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_6 (Dense)               │ (None, 512)               │         262,656 │ dropout_4[0][0]            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_10 (Dense)              │ (None, 1024)              │       1,049,600 │ dropout_7[0][0]            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dropout_2 (Dropout)           │ (None, 256)               │               0 │ dense_2[0][0]              │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dropout_5 (Dropout)           │ (None, 512)               │               0 │ dense_6[0][0]              │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dropout_8 (Dropout)           │ (None, 1024)              │               0 │ dense_10[0][0]             │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_3 (Dense)               │ (None, 64)                │          16,448 │ dropout_2[0][0]            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_7 (Dense)               │ (None, 64)                │          32,832 │ dropout_5[0][0]            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_11 (Dense)              │ (None, 64)                │          65,600 │ dropout_8[0][0]            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ concatenate (Concatenate)     │ (None, 192)               │               0 │ dense_3[0][0],             │
+│                               │                           │                 │ dense_7[0][0],             │
+│                               │                           │                 │ dense_11[0][0]             │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_12 (Dense)              │ (None, 128)               │          24,704 │ concatenate[0][0]          │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ output (Dense)                │ (None, 1)                 │             129 │ dense_12[0][0]             │
+└───────────────────────────────┴───────────────────────────┴─────────────────┴────────────────────────────┘
+ Total params: 3,216,909 (12.27 MB)
+ Trainable params: 3,215,847 (12.27 MB)
+ Non-trainable params: 1,062 (4.15 KB)
+>>> from sklearn.preprocessing import StandardScaler
+>>> sc = StandardScaler()
+>>> x_train_scaled = sc.fit_transform(X_train)
+>>> x_test_scaled = sc.transform(X_test)
+>>> model.compile(loss='binary_crossentropy',optimizer=tf.keras.optimizers.Adam(1e-4),metrics=['accuracy'])
+>>> model.fit(X_train,y_train,epochs=50,batch_size=128,validation_split=0.2)
+Epoch 1/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 10s 64ms/step - accuracy: 0.7804 - loss: 0.5176 - val_accuracy: 0.8041 - val_loss: 0.6336
+Epoch 2/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 56ms/step - accuracy: 0.8022 - loss: 0.4181 - val_accuracy: 0.8458 - val_loss: 0.5709
+Epoch 3/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 58ms/step - accuracy: 0.8374 - loss: 0.3671 - val_accuracy: 0.8759 - val_loss: 0.5114
+Epoch 4/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 59ms/step - accuracy: 0.8576 - loss: 0.3315 - val_accuracy: 0.8875 - val_loss: 0.4564
+Epoch 5/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 55ms/step - accuracy: 0.8724 - loss: 0.3151 - val_accuracy: 0.8904 - val_loss: 0.4128
+Epoch 6/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 55ms/step - accuracy: 0.8826 - loss: 0.3022 - val_accuracy: 0.8858 - val_loss: 0.3685
+Epoch 7/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 52ms/step - accuracy: 0.8736 - loss: 0.3061 - val_accuracy: 0.8893 - val_loss: 0.3399
+Epoch 8/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 53ms/step - accuracy: 0.8891 - loss: 0.2840 - val_accuracy: 0.8945 - val_loss: 0.3137
+Epoch 9/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 55ms/step - accuracy: 0.8922 - loss: 0.2868 - val_accuracy: 0.8887 - val_loss: 0.2881
+Epoch 10/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 58ms/step - accuracy: 0.8876 - loss: 0.2888 - val_accuracy: 0.8939 - val_loss: 0.2760
+Epoch 11/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 58ms/step - accuracy: 0.9001 - loss: 0.2639 - val_accuracy: 0.8951 - val_loss: 0.2752
+Epoch 12/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 72ms/step - accuracy: 0.8993 - loss: 0.2624 - val_accuracy: 0.8928 - val_loss: 0.2739
+Epoch 13/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 78ms/step - accuracy: 0.9166 - loss: 0.2384 - val_accuracy: 0.8991 - val_loss: 0.2712
+Epoch 14/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 67ms/step - accuracy: 0.9119 - loss: 0.2420 - val_accuracy: 0.8916 - val_loss: 0.2703
+Epoch 15/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 63ms/step - accuracy: 0.9055 - loss: 0.2518 - val_accuracy: 0.8968 - val_loss: 0.2726
+Epoch 16/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 65ms/step - accuracy: 0.9120 - loss: 0.2329 - val_accuracy: 0.8997 - val_loss: 0.2665
+Epoch 17/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 64ms/step - accuracy: 0.9189 - loss: 0.2178 - val_accuracy: 0.8962 - val_loss: 0.2705
+Epoch 18/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 67ms/step - accuracy: 0.9161 - loss: 0.2313 - val_accuracy: 0.8974 - val_loss: 0.2682
+Epoch 19/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 74ms/step - accuracy: 0.9202 - loss: 0.2150 - val_accuracy: 0.8945 - val_loss: 0.2658
+Epoch 20/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 73ms/step - accuracy: 0.9213 - loss: 0.2185 - val_accuracy: 0.8974 - val_loss: 0.2695
+Epoch 21/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 70ms/step - accuracy: 0.9187 - loss: 0.2158 - val_accuracy: 0.8986 - val_loss: 0.2668
+Epoch 22/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 72ms/step - accuracy: 0.9202 - loss: 0.2107 - val_accuracy: 0.8951 - val_loss: 0.2721
+Epoch 23/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 71ms/step - accuracy: 0.9148 - loss: 0.2259 - val_accuracy: 0.9003 - val_loss: 0.2728
+Epoch 24/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 71ms/step - accuracy: 0.9204 - loss: 0.2132 - val_accuracy: 0.8974 - val_loss: 0.2760
+Epoch 25/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 75ms/step - accuracy: 0.9307 - loss: 0.1947 - val_accuracy: 0.8962 - val_loss: 0.2829
+Epoch 26/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 74ms/step - accuracy: 0.9320 - loss: 0.1911 - val_accuracy: 0.8980 - val_loss: 0.2868
+Epoch 27/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 74ms/step - accuracy: 0.9280 - loss: 0.1978 - val_accuracy: 0.8974 - val_loss: 0.2854
+Epoch 28/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 75ms/step - accuracy: 0.9295 - loss: 0.1934 - val_accuracy: 0.8951 - val_loss: 0.2801
+Epoch 29/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 72ms/step - accuracy: 0.9302 - loss: 0.1830 - val_accuracy: 0.8968 - val_loss: 0.2906
+Epoch 30/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 72ms/step - accuracy: 0.9333 - loss: 0.1833 - val_accuracy: 0.8957 - val_loss: 0.2859
+Epoch 31/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 71ms/step - accuracy: 0.9313 - loss: 0.1868 - val_accuracy: 0.9003 - val_loss: 0.2931
+Epoch 32/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 71ms/step - accuracy: 0.9340 - loss: 0.1781 - val_accuracy: 0.9003 - val_loss: 0.2835
+Epoch 33/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 72ms/step - accuracy: 0.9326 - loss: 0.1730 - val_accuracy: 0.8962 - val_loss: 0.2852
+Epoch 34/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 72ms/step - accuracy: 0.9365 - loss: 0.1758 - val_accuracy: 0.8939 - val_loss: 0.2993
+Epoch 35/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 75ms/step - accuracy: 0.9387 - loss: 0.1704 - val_accuracy: 0.8933 - val_loss: 0.2838
+Epoch 36/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 71ms/step - accuracy: 0.9385 - loss: 0.1635 - val_accuracy: 0.8887 - val_loss: 0.3066
+Epoch 37/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 70ms/step - accuracy: 0.9354 - loss: 0.1655 - val_accuracy: 0.8962 - val_loss: 0.2984
+Epoch 38/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 74ms/step - accuracy: 0.9354 - loss: 0.1716 - val_accuracy: 0.8962 - val_loss: 0.3004
+Epoch 39/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 76ms/step - accuracy: 0.9407 - loss: 0.1564 - val_accuracy: 0.8957 - val_loss: 0.3056
+Epoch 40/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 75ms/step - accuracy: 0.9362 - loss: 0.1696 - val_accuracy: 0.8991 - val_loss: 0.3023
+Epoch 41/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 72ms/step - accuracy: 0.9358 - loss: 0.1672 - val_accuracy: 0.8916 - val_loss: 0.3082
+Epoch 42/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 70ms/step - accuracy: 0.9452 - loss: 0.1505 - val_accuracy: 0.8962 - val_loss: 0.3024
+Epoch 43/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 72ms/step - accuracy: 0.9358 - loss: 0.1608 - val_accuracy: 0.8846 - val_loss: 0.3226
+Epoch 44/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 71ms/step - accuracy: 0.9508 - loss: 0.1358 - val_accuracy: 0.8841 - val_loss: 0.3181
+Epoch 45/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 71ms/step - accuracy: 0.9385 - loss: 0.1533 - val_accuracy: 0.8875 - val_loss: 0.3148
+Epoch 46/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 69ms/step - accuracy: 0.9466 - loss: 0.1408 - val_accuracy: 0.8916 - val_loss: 0.3176
+Epoch 47/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 3s 61ms/step - accuracy: 0.9422 - loss: 0.1522 - val_accuracy: 0.8945 - val_loss: 0.3216
+Epoch 48/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 4s 70ms/step - accuracy: 0.9375 - loss: 0.1561 - val_accuracy: 0.8957 - val_loss: 0.3197
+Epoch 49/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 5s 86ms/step - accuracy: 0.9435 - loss: 0.1457 - val_accuracy: 0.8893 - val_loss: 0.3293
+Epoch 50/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 5s 92ms/step - accuracy: 0.9538 - loss: 0.1284 - val_accuracy: 0.8858 - val_loss: 0.3376
+<keras.src.callbacks.history.History object at 0x0000014F8691B1A0>
+>>> print("X_train shape:", X_train.shape)
+X_train shape: (8625, 177)
+>>> print("X_test shape:", X_test.shape)
+X_test shape: (2875, 177)
+>>> loss, accuracy = model.evaluate(X_test_scaled, y_test)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'X_test_scaled' is not defined. Did you mean: 'x_test_scaled'?
+>>> print(f'Test Loss: {loss:.4f}, Test Accuracy: {accuracy:.4f}')
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'loss' is not defined
+>>> # Plot the training history
+>>>
+>>> plt.figure(figsize=(12, 6))
+<Figure size 1200x600 with 0 Axes>
+>>> plt.plot(history.history['accuracy'], label='Training Accuracy')
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'history' is not defined
+>>> plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'history' is not defined
+>>> plt.title('Training and Validation Accuracy')
+Text(0.5, 1.0, 'Training and Validation Accuracy')
+>>> plt.xlabel('Epoch')
+Text(0.5, 0, 'Epoch')
+>>> plt.ylabel('Accuracy')
+Text(0, 0.5, 'Accuracy')
+>>> plt.legend()
+<stdin>:1: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called 
+with no argument.
+<matplotlib.legend.Legend object at 0x0000014F85133440>
+>>> plt.show()
+>>> loss, accuracy = model.evaluate(X_test_scaled, y_test)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'X_test_scaled' is not defined. Did you mean: 'x_test_scaled'?
+>>> loss, accuracy = model.evaluate(X_test_scaled, y_test)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'X_test_scaled' is not defined. Did you mean: 'x_test_scaled'?
+>>> import tensorflow as tf
+>>> from sklearn.preprocessing import StandardScaler
+>>> # Define the BiLSTM model
+>>>
+>>> def create_bilstm_model(input_shape):
+...     inp = tf.keras.layers.Input(shape=input_shape, name='input')
+...     x = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64, return_sequences=True))(inp)
+...     x = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32))(x)
+...     x = tf.keras.layers.Dense(64, activation=tf.keras.layers.LeakyReLU(0.2))(x)
+...     x = tf.keras.layers.Dropout(0.4)(x)
+...     x = tf.keras.layers.Dense(32, activation=tf.keras.layers.LeakyReLU(0.2))(x)
+...     x = tf.keras.layers.Dropout(0.4)(x)
+...     out = tf.keras.layers.Dense(1, activation='sigmoid', name='output')(x)
+...     model = tf.keras.models.Model(inputs=inp, outputs=out)
+...     return model
+...
+>>> sc = StandardScaler()
+>>> X_train_scaled = sc.fit_transform(X_train)
+>>> X_test_scaled = sc.transform(X_test)
+>>> model = create_bilstm_model((X_train_scaled.shape[1], 1))
+>>> model.compile(loss='binary_crossentropy', optimizer=tf.keras.optimizers.Adam(1e-4), metrics=['accuracy'])
+>>> # Reshape input data for LSTM layer
+>>>
+>>> X_train_scaled = np.expand_dims(X_train_scaled, axis=-1)
+>>> X_test_scaled = np.expand_dims(X_test_scaled, axis=-1)
+>>> history = model.fit(X_train_scaled, y_train, epochs=50, batch_size=128, validation_split=0.2)
+Epoch 1/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 68s 1s/step - accuracy: 0.6492 - loss: 0.6691 - val_accuracy: 0.8041 - val_loss: 0.5762
+Epoch 2/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 59s 1s/step - accuracy: 0.7970 - loss: 0.5553 - val_accuracy: 0.8041 - val_loss: 0.4445
+Epoch 3/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 65s 1s/step - accuracy: 0.8013 - loss: 0.4614 - val_accuracy: 0.8041 - val_loss: 0.4131
+Epoch 4/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 56s 1s/step - accuracy: 0.8005 - loss: 0.4272 - val_accuracy: 0.8041 - val_loss: 0.3931
+Epoch 5/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 49s 907ms/step - accuracy: 0.8023 - loss: 0.4118 - val_accuracy: 0.8191 - val_loss: 0.3656
+Epoch 6/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 51s 944ms/step - accuracy: 0.8306 - loss: 0.3827 - val_accuracy: 0.8672 - val_loss: 0.3386
+Epoch 7/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 58s 1s/step - accuracy: 0.8606 - loss: 0.3608 - val_accuracy: 0.8783 - val_loss: 0.3235
+Epoch 8/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 56s 1s/step - accuracy: 0.8711 - loss: 0.3558 - val_accuracy: 0.8417 - val_loss: 0.3532
+Epoch 9/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 28s 511ms/step - accuracy: 0.8599 - loss: 0.3580 - val_accuracy: 0.8777 - val_loss: 0.3140
+Epoch 10/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 26s 476ms/step - accuracy: 0.8780 - loss: 0.3365 - val_accuracy: 0.8788 - val_loss: 0.3146
+Epoch 11/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 23s 435ms/step - accuracy: 0.8761 - loss: 0.3408 - val_accuracy: 0.8748 - val_loss: 0.3112
+Epoch 12/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 24s 451ms/step - accuracy: 0.8766 - loss: 0.3339 - val_accuracy: 0.8794 - val_loss: 0.3101
+Epoch 13/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 25s 465ms/step - accuracy: 0.8817 - loss: 0.3196 - val_accuracy: 0.8771 - val_loss: 0.3054
+Epoch 14/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 26s 478ms/step - accuracy: 0.8785 - loss: 0.3300 - val_accuracy: 0.8794 - val_loss: 0.3029
+Epoch 15/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 27s 499ms/step - accuracy: 0.8817 - loss: 0.3293 - val_accuracy: 0.8829 - val_loss: 0.3010
+Epoch 16/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 29s 544ms/step - accuracy: 0.8857 - loss: 0.3132 - val_accuracy: 0.8870 - val_loss: 0.2941
+Epoch 17/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 29s 537ms/step - accuracy: 0.8892 - loss: 0.3057 - val_accuracy: 0.8887 - val_loss: 0.2927
+Epoch 18/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 29s 533ms/step - accuracy: 0.8879 - loss: 0.3188 - val_accuracy: 0.8904 - val_loss: 0.2949
+Epoch 19/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 28s 520ms/step - accuracy: 0.8903 - loss: 0.3092 - val_accuracy: 0.8922 - val_loss: 0.2864
+Epoch 20/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 31s 568ms/step - accuracy: 0.8878 - loss: 0.3163 - val_accuracy: 0.8974 - val_loss: 0.2836
+Epoch 21/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 29s 540ms/step - accuracy: 0.8934 - loss: 0.2990 - val_accuracy: 0.8962 - val_loss: 0.2836
+Epoch 22/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 563ms/step - accuracy: 0.8944 - loss: 0.2913 - val_accuracy: 0.8957 - val_loss: 0.2812
+Epoch 23/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 553ms/step - accuracy: 0.8946 - loss: 0.2940 - val_accuracy: 0.8928 - val_loss: 0.2831
+Epoch 24/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 563ms/step - accuracy: 0.8934 - loss: 0.3002 - val_accuracy: 0.8928 - val_loss: 0.2818
+Epoch 25/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 29s 541ms/step - accuracy: 0.8945 - loss: 0.2924 - val_accuracy: 0.8980 - val_loss: 0.2761
+Epoch 26/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 552ms/step - accuracy: 0.8992 - loss: 0.2862 - val_accuracy: 0.9014 - val_loss: 0.2720
+Epoch 27/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 547ms/step - accuracy: 0.8981 - loss: 0.2857 - val_accuracy: 0.8951 - val_loss: 0.2831
+Epoch 28/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 550ms/step - accuracy: 0.8961 - loss: 0.2952 - val_accuracy: 0.9061 - val_loss: 0.2676
+Epoch 29/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 29s 537ms/step - accuracy: 0.8930 - loss: 0.3042 - val_accuracy: 0.9038 - val_loss: 0.2659
+Epoch 30/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 29s 546ms/step - accuracy: 0.8952 - loss: 0.2866 - val_accuracy: 0.9003 - val_loss: 0.2668
+Epoch 31/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 29s 543ms/step - accuracy: 0.8987 - loss: 0.2845 - val_accuracy: 0.9009 - val_loss: 0.2655
+Epoch 32/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 550ms/step - accuracy: 0.8934 - loss: 0.2870 - val_accuracy: 0.9026 - val_loss: 0.2652
+Epoch 33/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 29s 542ms/step - accuracy: 0.8973 - loss: 0.2840 - val_accuracy: 0.9032 - val_loss: 0.2623
+Epoch 34/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 549ms/step - accuracy: 0.9017 - loss: 0.2768 - val_accuracy: 0.9043 - val_loss: 0.2615
+Epoch 35/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 29s 546ms/step - accuracy: 0.9052 - loss: 0.2727 - val_accuracy: 0.9020 - val_loss: 0.2654
+Epoch 36/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 550ms/step - accuracy: 0.9016 - loss: 0.2778 - val_accuracy: 0.9032 - val_loss: 0.2635
+Epoch 37/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 546ms/step - accuracy: 0.8985 - loss: 0.2752 - val_accuracy: 0.9032 - val_loss: 0.2628
+Epoch 38/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 563ms/step - accuracy: 0.8965 - loss: 0.2890 - val_accuracy: 0.9055 - val_loss: 0.2602
+Epoch 39/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 554ms/step - accuracy: 0.9048 - loss: 0.2750 - val_accuracy: 0.9067 - val_loss: 0.2621
+Epoch 40/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 36s 666ms/step - accuracy: 0.8978 - loss: 0.2711 - val_accuracy: 0.9061 - val_loss: 0.2593
+Epoch 41/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 37s 676ms/step - accuracy: 0.9067 - loss: 0.2657 - val_accuracy: 0.9107 - val_loss: 0.2565
+Epoch 42/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 31s 567ms/step - accuracy: 0.9014 - loss: 0.2683 - val_accuracy: 0.9072 - val_loss: 0.2600
+Epoch 43/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 32s 590ms/step - accuracy: 0.8941 - loss: 0.2873 - val_accuracy: 0.9090 - val_loss: 0.2590
+Epoch 44/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 557ms/step - accuracy: 0.8990 - loss: 0.2798 - val_accuracy: 0.9096 - val_loss: 0.2578
+Epoch 45/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 557ms/step - accuracy: 0.9072 - loss: 0.2565 - val_accuracy: 0.9055 - val_loss: 0.2569
+Epoch 46/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 31s 578ms/step - accuracy: 0.9058 - loss: 0.2629 - val_accuracy: 0.9049 - val_loss: 0.2718
+Epoch 47/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 557ms/step - accuracy: 0.9056 - loss: 0.2567 - val_accuracy: 0.9061 - val_loss: 0.2519
+Epoch 48/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 556ms/step - accuracy: 0.9058 - loss: 0.2607 - val_accuracy: 0.9130 - val_loss: 0.2505
+Epoch 49/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 551ms/step - accuracy: 0.9103 - loss: 0.2581 - val_accuracy: 0.9113 - val_loss: 0.2492
+Epoch 50/50
+54/54 ━━━━━━━━━━━━━━━━━━━━ 30s 552ms/step - accuracy: 0.9057 - loss: 0.2588 - val_accuracy: 0.9107 - val_loss: 0.2473
+>>> loss, accuracy = model.evaluate(X_test_scaled, y_test)
+90/90 ━━━━━━━━━━━━━━━━━━━━ 3s 38ms/step - accuracy: 0.9038 - loss: 0.2659
+>>> print(f'Test Loss: {loss:.4f}, Test Accuracy: {accuracy:.4f}')
+Test Loss: 0.2646, Test Accuracy: 0.9009
+>>> plt.figure(figsize=(12, 6))
+<Figure size 1200x600 with 0 Axes>
+>>> plt.plot(history.history['accuracy'], label='Training Accuracy')
+[<matplotlib.lines.Line2D object at 0x0000014FC67B6A50>]
+>>> plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+[<matplotlib.lines.Line2D object at 0x0000014FCCDDEB10>]
+>>> plt.title('Training and Validation Accuracy')
+Text(0.5, 1.0, 'Training and Validation Accuracy')
+>>> plt.xlabel('Epoch')
+Text(0.5, 0, 'Epoch')
+>>> plt.ylabel('Accuracy')
+Text(0, 0.5, 'Accuracy')
+>>> plt.legend()
+<matplotlib.legend.Legend object at 0x0000014FC6958800>
+>>> plt.show()
+>>> mport tensorflow as tf
+  File "<stdin>", line 1
+    mport tensorflow as tf
+          ^^^^^^^^^^
+SyntaxError: invalid syntax
+>>> from tensorflow.keras.layers import Input, Conv1D, MaxPooling1D, LSTM, Dense, Dropout, concatenate
+>>> from tensorflow.keras.models import Model
+>>> from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
+>>> from tensorflow.keras.regularizers import l2
+>>> from tensorflow.keras.optimizers import Adam
+>>>
+>>> # Define the convolutional front-end
+>>> def create_conv_frontend(input_shape):
+...     inp = Input(shape=input_shape, name='input')
+...     
+...     # Local Context CNN Encoder
+...     local_x = Conv1D(filters=32, kernel_size=3, activation='relu', padding='same')(inp)
+...     local_x = MaxPooling1D(pool_size=2)(local_x)
+...     local_x = Conv1D(filters=64, kernel_size=3, activation='relu', padding='same')(local_x)
+...     local_x = MaxPooling1D(pool_size=2)(local_x)
+...
+...     # Global Context CNN Encoder
+...     global_x = Conv1D(filters=64, kernel_size=15, activation='relu', padding='same')(inp)
+...     global_x = MaxPooling1D(pool_size=2)(global_x)
+...     global_x = Conv1D(filters=24, kernel_size=15, activation='relu', padding='same')(global_x)
+...     global_x = MaxPooling1D(pool_size=2)(global_x)
+...
+...     # Concatenate local and global features
+...     x = concatenate([local_x, global_x], axis=-1)
+...
+...     return inp, x
+...
+>>> # Define the LSTM-based RNN-T model with regularization
+>>> def create_rnnt_model(input_shape):
+...     inp, conv_features = create_conv_frontend(input_shape)
+...
+...     # Add LSTM layers
+...     x = LSTM(64, return_sequences=True, kernel_regularizer=l2(0.01))(conv_features)
+...     x = Dropout(0.4)(x)
+...     x = LSTM(64, kernel_regularizer=l2(0.01))(x)
+...     x = Dropout(0.4)(x)
+...
+...     # Dense layers
+...     x = Dense(64, activation='relu', kernel_regularizer=l2(0.01))(x)
+...     x = Dropout(0.4)(x)
+...     x = Dense(32, activation='relu', kernel_regularizer=l2(0.01))(x)
+...
+...     # Output layer
+...     out = Dense(1, activation='sigmoid', name='output')(x)
+...
+...     model = Model(inputs=inp, outputs=out)
+...     return model
+...
+>>>
+>>> X_train_scaled = np.expand_dims(X_train_scaled, axis=-1)
+>>> X_test_scaled = np.expand_dims(X_test_scaled, axis=-1)
+>>> # Create the model
+>>>
+>>> model = create_rnnt_model((X_train_scaled.shape[1], 1))
+>>> # Compile the model with Adam optimizer
+>>>
+>>> model.compile(loss='binary_crossentropy', optimizer=Adam(learning_rate=1e-4), metrics=['accuracy'])
+>>> # Define callbacks for checkpointing and early stopping
+>>>
+>>> checkpoint_cb = ModelCheckpoint("best_model.keras", save_best_only=True, monitor='val_loss', mode='min')
+>>> early_stopping_cb = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+>>> # Train the model
+>>>
+>>> history = model.fit(X_train_scaled, y_train,
+...                     epochs=100, 
+...                     batch_size=128, 
+...                     validation_split=0.2,
+...                     callbacks=[checkpoint_cb, early_stopping_cb])
+Epoch 1/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 10s 102ms/step - accuracy: 0.7212 - loss: 3.9747 - val_accuracy: 0.8041 - val_loss: 3.6056
+Epoch 2/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 5s 86ms/step - accuracy: 0.8111 - loss: 3.5272 - val_accuracy: 0.8041 - val_loss: 3.2807
+Epoch 3/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 5s 93ms/step - accuracy: 0.7975 - loss: 3.2384 - val_accuracy: 0.8041 - val_loss: 3.0110
+Epoch 4/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 106ms/step - accuracy: 0.8064 - loss: 2.9602 - val_accuracy: 0.8041 - val_loss: 2.7513
+Epoch 5/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 106ms/step - accuracy: 0.8003 - loss: 2.6934 - val_accuracy: 0.8597 - val_loss: 2.4205
+Epoch 6/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.8485 - loss: 2.3906 - val_accuracy: 0.9090 - val_loss: 2.2003
+Epoch 7/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.8822 - loss: 2.1840 - val_accuracy: 0.9142 - val_loss: 2.0108
+Epoch 8/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9095 - loss: 1.9724 - val_accuracy: 0.9159 - val_loss: 1.8539
+Epoch 9/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9098 - loss: 1.8413 - val_accuracy: 0.9258 - val_loss: 1.6930
+Epoch 10/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9179 - loss: 1.6801 - val_accuracy: 0.9130 - val_loss: 1.5528
+Epoch 11/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 102ms/step - accuracy: 0.9251 - loss: 1.5331 - val_accuracy: 0.9328 - val_loss: 1.4104
+Epoch 12/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9269 - loss: 1.4102 - val_accuracy: 0.9397 - val_loss: 1.2956
+Epoch 13/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9350 - loss: 1.2823 - val_accuracy: 0.9397 - val_loss: 1.1907
+Epoch 14/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9350 - loss: 1.1928 - val_accuracy: 0.9403 - val_loss: 1.0967
+Epoch 15/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 106ms/step - accuracy: 0.9408 - loss: 1.0913 - val_accuracy: 0.9496 - val_loss: 0.9925
+Epoch 16/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 107ms/step - accuracy: 0.9473 - loss: 1.0128 - val_accuracy: 0.9374 - val_loss: 0.9607
+Epoch 17/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9468 - loss: 0.9524 - val_accuracy: 0.9461 - val_loss: 0.8719
+Epoch 18/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9523 - loss: 0.8683 - val_accuracy: 0.9559 - val_loss: 0.7989
+Epoch 19/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9543 - loss: 0.8080 - val_accuracy: 0.9623 - val_loss: 0.7385
+Epoch 20/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9594 - loss: 0.7409 - val_accuracy: 0.9658 - val_loss: 0.6878
+Epoch 21/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9600 - loss: 0.6969 - val_accuracy: 0.9641 - val_loss: 0.6503
+Epoch 22/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9585 - loss: 0.6605 - val_accuracy: 0.9687 - val_loss: 0.6057
+Epoch 23/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9668 - loss: 0.6044 - val_accuracy: 0.9612 - val_loss: 0.5919
+Epoch 24/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 109ms/step - accuracy: 0.9643 - loss: 0.5865 - val_accuracy: 0.9606 - val_loss: 0.5501
+Epoch 25/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 112ms/step - accuracy: 0.9673 - loss: 0.5443 - val_accuracy: 0.9681 - val_loss: 0.5182
+Epoch 26/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 113ms/step - accuracy: 0.9626 - loss: 0.5215 - val_accuracy: 0.9652 - val_loss: 0.4897
+Epoch 27/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9689 - loss: 0.4910 - val_accuracy: 0.9641 - val_loss: 0.4646
+Epoch 28/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9583 - loss: 0.4823 - val_accuracy: 0.9699 - val_loss: 0.4416
+Epoch 29/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9661 - loss: 0.4472 - val_accuracy: 0.9699 - val_loss: 0.4127
+Epoch 30/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9719 - loss: 0.4148 - val_accuracy: 0.9467 - val_loss: 0.4634
+Epoch 31/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 113ms/step - accuracy: 0.9617 - loss: 0.4195 - val_accuracy: 0.9681 - val_loss: 0.3886
+Epoch 32/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 109ms/step - accuracy: 0.9670 - loss: 0.3854 - val_accuracy: 0.9710 - val_loss: 0.3624
+Epoch 33/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9670 - loss: 0.3757 - val_accuracy: 0.9681 - val_loss: 0.3580
+Epoch 34/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9759 - loss: 0.3446 - val_accuracy: 0.9728 - val_loss: 0.3427
+Epoch 35/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9669 - loss: 0.3500 - val_accuracy: 0.9675 - val_loss: 0.3310
+Epoch 36/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 107ms/step - accuracy: 0.9717 - loss: 0.3342 - val_accuracy: 0.9716 - val_loss: 0.3122
+Epoch 37/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9676 - loss: 0.3228 - val_accuracy: 0.9739 - val_loss: 0.3070
+Epoch 38/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9769 - loss: 0.2945 - val_accuracy: 0.9664 - val_loss: 0.2993
+Epoch 39/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9784 - loss: 0.2850 - val_accuracy: 0.9623 - val_loss: 0.2959
+Epoch 40/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9715 - loss: 0.2987 - val_accuracy: 0.9710 - val_loss: 0.2812
+Epoch 41/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9763 - loss: 0.2714 - val_accuracy: 0.9716 - val_loss: 0.2708
+Epoch 42/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9749 - loss: 0.2699 - val_accuracy: 0.9728 - val_loss: 0.2673
+Epoch 43/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9722 - loss: 0.2638 - val_accuracy: 0.9739 - val_loss: 0.2515
+Epoch 44/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9790 - loss: 0.2436 - val_accuracy: 0.9716 - val_loss: 0.2526
+Epoch 45/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9751 - loss: 0.2469 - val_accuracy: 0.9501 - val_loss: 0.3097
+Epoch 46/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9703 - loss: 0.2590 - val_accuracy: 0.9652 - val_loss: 0.2542
+Epoch 47/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 7s 126ms/step - accuracy: 0.9724 - loss: 0.2382 - val_accuracy: 0.9617 - val_loss: 0.2581
+Epoch 48/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 110ms/step - accuracy: 0.9689 - loss: 0.2428 - val_accuracy: 0.9646 - val_loss: 0.2419
+Epoch 49/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 111ms/step - accuracy: 0.9799 - loss: 0.2202 - val_accuracy: 0.9722 - val_loss: 0.2327
+Epoch 50/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 110ms/step - accuracy: 0.9737 - loss: 0.2338 - val_accuracy: 0.9606 - val_loss: 0.2590
+Epoch 51/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 109ms/step - accuracy: 0.9719 - loss: 0.2356 - val_accuracy: 0.9530 - val_loss: 0.2626
+Epoch 52/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9733 - loss: 0.2246 - val_accuracy: 0.9652 - val_loss: 0.2332
+Epoch 53/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 106ms/step - accuracy: 0.9726 - loss: 0.2114 - val_accuracy: 0.9687 - val_loss: 0.2157
+Epoch 54/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 107ms/step - accuracy: 0.9787 - loss: 0.2050 - val_accuracy: 0.9757 - val_loss: 0.2047
+Epoch 55/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 107ms/step - accuracy: 0.9776 - loss: 0.1995 - val_accuracy: 0.9751 - val_loss: 0.2019
+Epoch 56/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9770 - loss: 0.1922 - val_accuracy: 0.9745 - val_loss: 0.1997
+Epoch 57/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 108ms/step - accuracy: 0.9823 - loss: 0.1814 - val_accuracy: 0.9739 - val_loss: 0.1973
+Epoch 58/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9768 - loss: 0.1969 - val_accuracy: 0.9728 - val_loss: 0.1994
+Epoch 59/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9795 - loss: 0.1901 - val_accuracy: 0.9716 - val_loss: 0.1948
+Epoch 60/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9720 - loss: 0.2002 - val_accuracy: 0.9762 - val_loss: 0.1885
+Epoch 61/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9834 - loss: 0.1776 - val_accuracy: 0.9722 - val_loss: 0.1926
+Epoch 62/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9793 - loss: 0.1800 - val_accuracy: 0.9751 - val_loss: 0.1972
+Epoch 63/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9795 - loss: 0.1750 - val_accuracy: 0.9762 - val_loss: 0.1850
+Epoch 64/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9819 - loss: 0.1693 - val_accuracy: 0.9768 - val_loss: 0.1842
+Epoch 65/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9810 - loss: 0.1772 - val_accuracy: 0.9751 - val_loss: 0.1805
+Epoch 66/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 110ms/step - accuracy: 0.9811 - loss: 0.1695 - val_accuracy: 0.9751 - val_loss: 0.1816
+Epoch 67/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 113ms/step - accuracy: 0.9843 - loss: 0.1615 - val_accuracy: 0.9768 - val_loss: 0.1805
+Epoch 68/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 108ms/step - accuracy: 0.9848 - loss: 0.1583 - val_accuracy: 0.9728 - val_loss: 0.1778
+Epoch 69/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 108ms/step - accuracy: 0.9792 - loss: 0.1738 - val_accuracy: 0.9733 - val_loss: 0.1763
+Epoch 70/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 102ms/step - accuracy: 0.9833 - loss: 0.1543 - val_accuracy: 0.9687 - val_loss: 0.2054
+Epoch 71/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9756 - loss: 0.1827 - val_accuracy: 0.9571 - val_loss: 0.2126
+Epoch 72/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 106ms/step - accuracy: 0.9753 - loss: 0.1826 - val_accuracy: 0.9780 - val_loss: 0.1673
+Epoch 73/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9849 - loss: 0.1543 - val_accuracy: 0.9722 - val_loss: 0.1737
+Epoch 74/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 115ms/step - accuracy: 0.9808 - loss: 0.1593 - val_accuracy: 0.9722 - val_loss: 0.1772
+Epoch 75/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 108ms/step - accuracy: 0.9818 - loss: 0.1546 - val_accuracy: 0.9722 - val_loss: 0.1706
+Epoch 76/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9833 - loss: 0.1608 - val_accuracy: 0.9722 - val_loss: 0.1795
+Epoch 77/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9807 - loss: 0.1575 - val_accuracy: 0.9803 - val_loss: 0.1668
+Epoch 78/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 109ms/step - accuracy: 0.9792 - loss: 0.1624 - val_accuracy: 0.9728 - val_loss: 0.1655
+Epoch 79/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9834 - loss: 0.1536 - val_accuracy: 0.9791 - val_loss: 0.1592
+Epoch 80/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9833 - loss: 0.1519 - val_accuracy: 0.9797 - val_loss: 0.1553
+Epoch 81/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 106ms/step - accuracy: 0.9812 - loss: 0.1528 - val_accuracy: 0.9786 - val_loss: 0.1577
+Epoch 82/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9812 - loss: 0.1479 - val_accuracy: 0.9797 - val_loss: 0.1615
+Epoch 83/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9831 - loss: 0.1446 - val_accuracy: 0.9751 - val_loss: 0.1630
+Epoch 84/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9852 - loss: 0.1420 - val_accuracy: 0.9687 - val_loss: 0.1761
+Epoch 85/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9840 - loss: 0.1459 - val_accuracy: 0.9693 - val_loss: 0.1757
+Epoch 86/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9847 - loss: 0.1403 - val_accuracy: 0.9699 - val_loss: 0.1672
+Epoch 87/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9788 - loss: 0.1528 - val_accuracy: 0.9814 - val_loss: 0.1556
+Epoch 88/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 106ms/step - accuracy: 0.9832 - loss: 0.1410 - val_accuracy: 0.9617 - val_loss: 0.1821
+Epoch 89/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 109ms/step - accuracy: 0.9841 - loss: 0.1351 - val_accuracy: 0.9803 - val_loss: 0.1475
+Epoch 90/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 9s 91ms/step - accuracy: 0.9846 - loss: 0.1384 - val_accuracy: 0.9774 - val_loss: 0.1554
+Epoch 91/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 108ms/step - accuracy: 0.9762 - loss: 0.1589 - val_accuracy: 0.9780 - val_loss: 0.1508
+Epoch 92/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 105ms/step - accuracy: 0.9877 - loss: 0.1286 - val_accuracy: 0.9762 - val_loss: 0.1523
+Epoch 93/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9845 - loss: 0.1310 - val_accuracy: 0.9710 - val_loss: 0.1553
+Epoch 94/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 103ms/step - accuracy: 0.9860 - loss: 0.1343 - val_accuracy: 0.9739 - val_loss: 0.1527
+Epoch 95/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 104ms/step - accuracy: 0.9867 - loss: 0.1316 - val_accuracy: 0.9739 - val_loss: 0.1560
+Epoch 96/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 111ms/step - accuracy: 0.9781 - loss: 0.1544 - val_accuracy: 0.9762 - val_loss: 0.1491
+Epoch 97/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 117ms/step - accuracy: 0.9845 - loss: 0.1314 - val_accuracy: 0.9786 - val_loss: 0.1449
+Epoch 98/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 111ms/step - accuracy: 0.9840 - loss: 0.1341 - val_accuracy: 0.9762 - val_loss: 0.1465
+Epoch 99/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 113ms/step - accuracy: 0.9869 - loss: 0.1282 - val_accuracy: 0.9809 - val_loss: 0.1449
+Epoch 100/100
+54/54 ━━━━━━━━━━━━━━━━━━━━ 6s 107ms/step - accuracy: 0.9861 - loss: 0.1228 - val_accuracy: 0.9774 - val_loss: 0.1500
+>>> loss, accuracy = model.evaluate(X_test_scaled, y_test)
+90/90 ━━━━━━━━━━━━━━━━━━━━ 1s 11ms/step - accuracy: 0.9826 - loss: 0.1553
+>>> print(f'Test Loss: {loss:.4f}, Test Accuracy: {accuracy:.4f}')
+Test Loss: 0.1491, Test Accuracy: 0.9812
+>>> plt.figure(figsize=(12, 6))
+<Figure size 1200x600 with 0 Axes>
+>>> plt.plot(history.history['accuracy'], label='Training Accuracy')
+[<matplotlib.lines.Line2D object at 0x00000150072111C0>]
+>>> plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+[<matplotlib.lines.Line2D object at 0x0000015007211280>]
+>>> plt.title('Training and Validation Accuracy')
+Text(0.5, 1.0, 'Training and Validation Accuracy')
+>>> plt.xlabel('Epoch')
+Text(0.5, 0, 'Epoch')
+>>> plt.ylabel('Accuracy')
+Text(0, 0.5, 'Accuracy')
+>>> plt.legend()
+<matplotlib.legend.Legend object at 0x0000015006CA0800>
+>>> plt.show()
+>>> 
